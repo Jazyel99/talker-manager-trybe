@@ -92,6 +92,26 @@ validateTalk, validateWatchedAt, validateRate], async (req, res) => {
   res.status(201).json(newTalker);
 });
 
+// ::TODO 6 - Crie o endpoint PUT /talker/:id
+app.put('/talker/:id', [validateToken, validateName, validateAge,
+validateTalk, validateWatchedAt, validateRate], async (req, res) => {
+  const idParams = req.params.id;
+  const talker = req.body;
+  const talkers = JSON.parse(await readTalkerJson(TALKERS_FILE_JSON));
+  
+  const newTalkers = talkers.filter(({ id }) => Number(idParams) !== id);
+  
+  const newTalker = {
+    id: Number(idParams),
+    ...talker,
+  };
+  
+  newTalkers.push(newTalker);
+  newTalkers.sort((a, b) => a.id - b.id);
+  writeTalkersJson(newTalkers);
+  res.status(200).json(newTalker);
+});
+
 app.delete('/talker/:id', validateToken, async (req, res) => {
   const idParams = req.params.id;
   const talkers = JSON.parse(await readTalkerJson(TALKERS_FILE_JSON));
