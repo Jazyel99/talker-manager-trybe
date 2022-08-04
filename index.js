@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs').promises;
 const crypto = require('crypto');
+const { validateEmail, validatePassword } = require('./middlewares');
 
 function generateToken() {
   return crypto.randomBytes(8).toString('hex');
@@ -44,7 +45,7 @@ app.get('/talker/:id', async (req, res) => {
   }
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', [validateEmail, validatePassword], (req, res) => {
   res.status(200).json({ token: generateToken() });
 });
 
