@@ -2,7 +2,15 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs').promises;
 const crypto = require('crypto');
-const { validateEmail, validatePassword } = require('./middlewares');
+const { validateEmail, 
+  validatePassword, validateToken,
+  validateName,
+  validateAge,
+  validateTalk,
+  validateWatchedAt,
+  validateRate } = require('./middlewares');
+
+const TALKERS_FILE_JSON = 'talker.json';
 
 function generateToken() {
   return crypto.randomBytes(8).toString('hex');
@@ -15,6 +23,28 @@ const readTalkerJson = async (fileName) => {
   } catch (error) {
     return [];
   }
+};
+
+const writeTalkersJson = async (talkers) => {
+  const data = JSON.stringify(talkers);
+
+  fs.writeFile(TALKERS_FILE_JSON, data, (err) => {
+      if (err) throw err;
+      console.log('Data written to file');
+  });
+};
+
+const createNewTalker = async (talker) => {
+  const talkers = await readTalkerJson(TALKERS_FILE_JSON);
+
+  const lastTalker = JSON.parse(talkers).length;
+
+  const newTalker = {
+    id: lastTalker + 1,
+    ...talker,
+  };
+
+  return newTalker;
 };
 
 const app = express();
@@ -47,6 +77,19 @@ app.get('/talker/:id', async (req, res) => {
 
 app.post('/login', [validateEmail, validatePassword], (req, res) => {
   res.status(200).json({ token: generateToken() });
+});
+
+app.post('/talker', [validateToken, validateName, validateAge,
+validateTalk, validateWatchedAt, validateRate], async (req, res) => {
+  const talker = req.body;
+
+  const talkers = JSON.parse(await readTalkerJson('talker.json'));
+  const newTalker = await createNewTalker(talker);
+  talkers.push(newTalker);
+
+  writeTalkersJson(talkers);
+
+  res.status(201).json(newTalker);
 });
 
 app.listen(PORT, () => {
