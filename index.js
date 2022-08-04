@@ -92,7 +92,7 @@ validateTalk, validateWatchedAt, validateRate], async (req, res) => {
   res.status(201).json(newTalker);
 });
 
-// ::TODO 6 - Crie o endpoint PUT /talker/:id
+// ::DONE 6 - Crie o endpoint PUT /talker/:id
 app.put('/talker/:id', [validateToken, validateName, validateAge,
 validateTalk, validateWatchedAt, validateRate], async (req, res) => {
   const idParams = req.params.id;
