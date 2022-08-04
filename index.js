@@ -83,13 +83,22 @@ app.post('/talker', [validateToken, validateName, validateAge,
 validateTalk, validateWatchedAt, validateRate], async (req, res) => {
   const talker = req.body;
 
-  const talkers = JSON.parse(await readTalkerJson('talker.json'));
+  const talkers = JSON.parse(await readTalkerJson(TALKERS_FILE_JSON));
   const newTalker = await createNewTalker(talker);
   talkers.push(newTalker);
 
   writeTalkersJson(talkers);
 
   res.status(201).json(newTalker);
+});
+
+app.delete('/talker/:id', validateToken, async (req, res) => {
+  const idParams = req.params.id;
+  const talkers = JSON.parse(await readTalkerJson(TALKERS_FILE_JSON));
+  const newTalkers = talkers.filter(({ id }) => Number(idParams) !== id);
+  writeTalkersJson(newTalkers);
+
+  res.status(204).send('');
 });
 
 app.listen(PORT, () => {
